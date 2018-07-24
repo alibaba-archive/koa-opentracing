@@ -6,7 +6,7 @@ const wrapper = (app, opt) => {
   const opentracing = app.opentracing = new OpenTracing(app)
   if (opt.carrier) {
     for (const key of Object.keys(opt.carrier)) {
-      const carrier = config.carrier[key];
+      const carrier = opt.carrier[key];
       if (carrier === false) continue;
       opentracing.setCarrier(key, carrier);
     }
