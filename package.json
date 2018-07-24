@@ -1,0 +1,13 @@
+{
+  "name": "koa-opentracing",
+  "main": "src/index.js",
+  "dependencies": {
+    "address": "^1.0.3",
+    "opentracing": "^0.14.3",
+    "zipkin": "^0.14.0",
+    "zipkin-transport-http": "^0.14.0"
+  },
+  "devDependencies": {
+    "koa": "^2.5.2"
+  }
+}
