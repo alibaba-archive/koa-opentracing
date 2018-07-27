@@ -42,9 +42,9 @@ function convertToZipkinSpan(span) {
   result.id = span.spanId
   result.name = span.name
   // it's microseconds
-  result.timestamp = span.startTime * 1000
+  result.timestamp = span._startTime * 1000
   // it's microseconds
-  result.duration = (span.finishTime - span.startTime) * 1000
+  result.duration = (span._finishTime - span._startTime) * 1000
   result.tags = span.getTags()
 
   result.localEndpoint = {
@@ -69,7 +69,7 @@ function convertToZipkinSpan(span) {
   }
 
   result.annotations = []
-  result.debug = false
-  result.shared = false
+  result.debug = span.getTag('debug') || false
+  result.shared = span.getTag('shared') || false
   return result
 }
