@@ -2,6 +2,16 @@ const Tracer = require('./tracer')
 const OpenTracing = require('./opentracing')
 const ZipkinLogger = require('./logger/zipkinLogger')
 const HTTPCarrier = require('./carrier/httpCarrier')
+
+const _carrier = {}
+
+const setCarrier = (key, carrier) => {
+  _carrier[key] = carrier
+}
+
+const getCarrier = key => {
+  return _carrier[key]
+}
 /**
  *
  * @param {Application} app
@@ -12,36 +22,24 @@ const HTTPCarrier = require('./carrier/httpCarrier')
  * @param {Object} [opt.httpTag]
  * @param {Boolean} [opt.httpTag.header]
  * @param {Object} [opt.carrier]
+ * @param {Sampler} [opt.sampler]
  */
 const koaOpentracing = (app, opt) => {
-  const opentracing = app.opentracing = new OpenTracing(app)
-  if (opt.carrier) {
-    for (const key of Object.keys(opt.carrier)) {
-      const carrier = opt.carrier[key]
-      if (!carrier) continue
-      opentracing.setCarrier(key, carrier)
-    }
-  }
+  if (opt.carrier) Object.assign(_carrier, opt.carrier)
 
   let httpCarrier
   if (opt.httpCarrier === null) {
     httpCarrier = null
   } else if (opt.httpCarrier === undefined) {
     httpCarrier = 'HTTP'
-    if (!opentracing.getCarrier('HTTP'))
-      opentracing.setCarrier('HTTP', HTTPCarrier)
+    if (!getCarrier('HTTP')) setCarrier('HTTP', HTTPCarrier)
   } else if (typeof opt.httpCarrier === 'string') {
     httpCarrier = opt.httpCarrier
   } else if (typeof opt.httpCarrier === 'object') {
-    httpCarrier = Symbol('OpenTracing#HttpCarrier')
-    opentracing.setCarrier(httpCarrier, opt.httpCarrier)
+    httpCarrier = Symbol('HttpCarrier')
+    setCarrier(httpCarrier, opt.httpCarrier)
   }
 
-  if (opt.logger) {
-    for (const logger of opt.logger) {
-      opentracing.addLogger(logger)
-    }
-  }
   app.use(createTracer(opt))
   if (opt.httpCarrier) {
     app.use(traceHttp(opt, httpCarrier))
@@ -49,7 +47,8 @@ const koaOpentracing = (app, opt) => {
 }
 const createTracer = opt => {
   return async (ctx, next) => {
-    ctx.tracer = ctx.tracer || new Tracer(ctx, opt)
+    // if (sampler.isSimpled())
+    ctx.tracer = ctx.tracer || new Tracer(opt)
     await next()
   }
 }
@@ -88,3 +87,5 @@ module.exports.logger = {
 module.exports.carrier = {
   HTTPCarrier,
 }
+module.exports.setCarrier = setCarrier
+module.exports.getCarrier = getCarrier

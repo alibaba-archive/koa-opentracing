@@ -4,39 +4,43 @@ const opentracing = require('opentracing')
 const address = require('address')
 const SpanContext = require('./span_context')
 
-const CONTEXT = Symbol('Span#context')
-const TAGS = Symbol('Span#tags')
-const PARENT_CONTEXT = Symbol('Span#parentContext')
 const WORKER_ID = cluster.worker && cluster.worker.id || 0
 const IPV4 = address.ip()
 const IPV6 = address.ipv6()
 
-
 class Span extends opentracing.Span {
 
-  constructor(ctx, options = {}) {
-    assert(ctx, 'ctx is required')
-
+  constructor(tracer, spanOptions) {
     super()
 
-    this.ctx = ctx
-    this.startTime = Date.now()
-    this.finishTime = null
-    this[TAGS] = new Map()
+    this.TRACER = tracer
+    this._startTime = spanOptions.startTime || Date.now()
+    this._finishTime = null
+    this._tags = spanOptions.tags || {}
+    this._references = spanOptions.references
+    this._parentSpanContext
 
-    let parentSpanContext
-    if (options.parentSpan) {
-      if (options.parentSpan instanceof SpanContext) {
-        parentSpanContext = options.parentSpan
-      } else if (options.parentSpan instanceof Span) {
-        parentSpanContext = options.parentSpan.context()
+    // for test
+    this.CONTEXT = spanOptions.context
+
+    if (!this.context()) {
+      if (spanOptions.childOf) {
+        if (spanOptions.childOf instanceof SpanContext) {
+          this._parentSpanContext = spanOptions.childOf
+        } else if (spanOptions.childOf instanceof Span) {
+          this._parentSpanContext = spanOptions.childOf.context()
+        }
+      } else if (this._references && this._references.length > 0) {
+        const parentSpan = this._references[0]
+        if (parentSpan instanceof Span) {
+          this._parentSpanContext = parentSpan.context()
+        }
       }
     }
-    this[PARENT_CONTEXT] = parentSpanContext
 
-    this[CONTEXT] = new SpanContext({ parentSpanContext })
+    this.CONTEXT = new SpanContext(this._parentSpanContext)
 
-    this.setTag('appname', options.appname)
+    this.setTag('appname', tracer.appname)
     this.setTag('worker.id', WORKER_ID)
     this.setTag('process.id', process.pid)
     this.setTag('local.ipv4', IPV4)
@@ -44,27 +48,19 @@ class Span extends opentracing.Span {
   }
 
   get traceId() {
-    return this[CONTEXT].traceId
+    return this.CONTEXT.traceId
   }
 
   get spanId() {
-    return this[CONTEXT].spanId
-  }
-
-  get rpcId() {
-    return this[CONTEXT].rpcId
+    return this.CONTEXT.spanId
   }
 
   get parentSpanId() {
-    return this[PARENT_CONTEXT] ? this[PARENT_CONTEXT].spanId : ''
+    return this._parentSpanContext ? this._parentSpanContext.spanId : ''
   }
 
   _context() {
-    return this[CONTEXT]
-  }
-
-  _tracer() {
-    return this.ctx.tracer
+    return this.CONTEXT
   }
 
   _setOperationName(name) {
@@ -72,35 +68,33 @@ class Span extends opentracing.Span {
   }
 
   _setBaggageItem(key, value) {
-    this[CONTEXT].setBaggage(key, value)
+    this.CONTEXT.setBaggage(key, value)
   }
 
   _getBaggageItem(key) {
-    return this[CONTEXT].getBaggage(key)
+    return this.CONTEXT.getBaggage(key)
   }
 
   _addTags(tags) {
-    for (const key of Object.keys(tags)) {
-      if (!key) continue
-      this[TAGS].set(key, tags[key])
-    }
+    Object.assign(this._tags, tags)
   }
 
   getTag(key) {
-    return this[TAGS].get(key)
+    return this._tags[key]
   }
 
   getTags() {
-    const result = {}
-    for (const [ key, value ] of this[TAGS].entries()) {
-      result[key] = value
-    }
-    return result
+    return Object.keys(this._tags).reduce((r, k) => {
+      r[k] = this._tags[k].toString()
+      return r
+    }, {})
+    return Object.assign({}, this._tags)
   }
 
   _finish(finishTime) {
-    this.finishTime = finishTime || Date.now()
-    this.ctx.app.opentracing.log(this)
+    if (this._finishTime) return
+    this._finishTime = finishTime || Date.now()
+    this.TRACER.log(this)
   }
 
 }

@@ -2,14 +2,26 @@ const assert = require('assert')
 const opentracing = require('opentracing')
 const Span = require('./span')
 const SpanContext = require('./span_context')
+const koaOpentracing = require('./index')
 
 class Tracer extends opentracing.Tracer {
 
-  constructor(ctx, opt) {
+  constructor(opt) {
     super()
-    this.ctx = ctx
     this.currentSpan = null
+    this.logger = Array.from(opt.logger)
     this.opt = opt
+    this.appname = opt.appname
+  }
+
+  log(span) {
+    if (!(span instanceof Span)) return
+    process.nextTick(() => {
+      this.logger.forEach(logger => {
+        console.log('log span', logger)
+        logger.log(span)
+      })
+    })
   }
 
   /**
@@ -38,17 +50,13 @@ class Tracer extends opentracing.Tracer {
     }
   }
 
-  _startSpan(name, options) {
+  _startSpan(name, spanOptions = {}) {
     assert(name, 'name is required when startSpan')
 
-    const spanOptions = Object.assign({}, this.opt)
-    if (options.references && options.references.length) {
-      spanOptions.parentSpan = options.references[0].referencedContext()
-    } else if (this.currentSpan) {
-      spanOptions.parentSpan = this.currentSpan
-    }
+    if (!spanOptions.childOf && (!spanOptions.references || spanOptions.length === 0))
+      spanOptions.childOf = this.currentSpan
 
-    const span = new Span(this.ctx, spanOptions)
+    const span = new Span(this, spanOptions)
     span.setOperationName(name)
     if (!this.traceId) this.traceId = span.traceId
     if (!this.currentSpan) this.currentSpan = span
@@ -57,21 +65,20 @@ class Tracer extends opentracing.Tracer {
 
   _inject(spanContext, format, carrier) {
     carrier = carrier || {}
-    const carrierInstance = this.ctx.app.opentracing.getCarrier(format)
-    assert(carrierInstance, `${format} is unknown carrier`)
+    const carrierInstance = koaOpentracing.getCarrier(format)
+    if (!carrierInstance) return
     Object.assign(carrier, carrierInstance.inject(spanContext))
   }
 
   _extract(format, carrier) {
-    const carrierInstance = this.ctx.app.opentracing.getCarrier(format)
-    assert(carrierInstance, `${format} is unknown carrier`)
+    const carrierInstance = koaOpentracing.getCarrier(format)
+    if (!carrierInstance) return null
     const result = carrierInstance.extract(carrier)
     if (!(result.traceId && result.spanId)) return null
 
     const spanContext = new SpanContext({
       traceId: result.traceId,
       spanId: result.spanId,
-      rpcId: result.rpcId,
       baggages: result.baggage,
     })
     return spanContext
