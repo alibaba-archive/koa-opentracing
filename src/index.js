@@ -1,6 +1,5 @@
 const Tracer = require('./tracer')
 const {NoopTracer} = require('./noop')
-const OpenTracing = require('./opentracing')
 const ZipkinLogger = require('./logger/zipkinLogger')
 const HTTPCarrier = require('./carrier/httpCarrier')
 
