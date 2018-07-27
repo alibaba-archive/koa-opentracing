@@ -10,7 +10,7 @@ const IPV6 = address.ipv6()
 
 class Span extends opentracing.Span {
 
-  constructor(tracer, spanOptions) {
+  constructor(tracer, spanOptions = {}) {
     super()
 
     this.TRACER = tracer

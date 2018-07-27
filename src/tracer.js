@@ -6,10 +6,10 @@ const koaOpentracing = require('./index')
 
 class Tracer extends opentracing.Tracer {
 
-  constructor(opt) {
+  constructor(opt = {}) {
     super()
     this.currentSpan = null
-    this.logger = Array.from(opt.logger)
+    this.logger = opt.logger ? Array.from(opt.logger) : []
     this.opt = opt
     this.appname = opt.appname
   }
@@ -18,7 +18,6 @@ class Tracer extends opentracing.Tracer {
     if (!(span instanceof Span)) return
     process.nextTick(() => {
       this.logger.forEach(logger => {
-        console.log('log span', logger)
         logger.log(span)
       })
     })

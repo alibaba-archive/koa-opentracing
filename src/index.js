@@ -1,4 +1,5 @@
 const Tracer = require('./tracer')
+const {NoopTracer} = require('./noop')
 const OpenTracing = require('./opentracing')
 const ZipkinLogger = require('./logger/zipkinLogger')
 const HTTPCarrier = require('./carrier/httpCarrier')
@@ -47,7 +48,7 @@ const koaOpentracing = (app, opt) => {
 }
 const createTracer = opt => {
   return async (ctx, next) => {
-    // if (sampler.isSimpled())
+    if (opt.sampler && !opt.sampler.isSampled(ctx)) ctx.tracer = new NoopTracer
     ctx.tracer = ctx.tracer || new Tracer(opt)
     await next()
   }
