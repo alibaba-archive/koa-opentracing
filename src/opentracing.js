@@ -32,7 +32,7 @@ class OpenTracing {
 
   setCarrier(key, Carrier) {
     assert(Carrier && Carrier.prototype.inject && Carrier.prototype.extract,
-      'carrier !')
+      'carrier should implement inject and extract')
     this[CARRIER].set(key, new Carrier())
   }
 

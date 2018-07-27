@@ -4,10 +4,10 @@ const app = new Koa()
 const koaOpentracing = require('../src/index')
 koaOpentracing(app, {
   appname: 'test',
-  http: true,
   logger: [
     {log: console.log}
   ],
+  httpCarrier: koaOpentracing.carrier.HTTPCarrier,
   carrier: {
     CustomHeaderCarrier: class CustomHeaderCarrier {
       inject(spanContext) {
@@ -15,8 +15,8 @@ koaOpentracing(app, {
       }
 
       extract(header) {
-        const traceId = header['x-request-id'].substr(0, 32)
-        const spanId = header['x-request-id'].substr(32)
+        const traceId = String(header['x-request-id']).substr(0, 32)
+        const spanId = String(header['x-request-id']).substr(32)
         return {traceId, spanId}
       }
     }
