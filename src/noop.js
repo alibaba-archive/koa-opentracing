@@ -1,27 +1,22 @@
 const Tracer = require('./tracer')
 const Span = require('./span')
-const SpanContext = require('./span_context')
 
 class NoopSpan extends Span {
-  _finish() {
+  _finish () {
 
   }
 }
 
 class NoopTracer extends Tracer {
-  constructor() {
-    super()
-  }
-
-  _startSpan() {
+  _startSpan () {
     return new NoopSpan(this)
   }
 
-  _inject() {
+  _inject () {
 
   }
 
-  _extract() {
+  _extract () {
     return null
   }
 }

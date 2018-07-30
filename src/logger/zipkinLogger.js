@@ -1,21 +1,20 @@
 const assert = require('assert')
 const { HttpLogger } = require('zipkin-transport-http')
 const zipkin = require('zipkin')
-const crypto = require('crypto')
 
 const map = {
   v1: {
     endpoint: '/api/v1/spans',
-    jsonEncoder: zipkin.jsonEncoder.JSON_V1,
+    jsonEncoder: zipkin.jsonEncoder.JSON_V1
   },
   v2: {
     endpoint: '/api/v2/spans',
-    jsonEncoder: zipkin.jsonEncoder.JSON_V2,
-  },
+    jsonEncoder: zipkin.jsonEncoder.JSON_V2
+  }
 }
 
 class LogCollector {
-  constructor(config) {
+  constructor (config) {
     const zipkinConfig = config
 
     let options = map[zipkinConfig.version]
@@ -27,17 +26,16 @@ class LogCollector {
     this.logger = new HttpLogger(options)
   }
 
-  log(span) {
+  log (span) {
     this.logger.logSpan(convertToZipkinSpan(span))
   }
 }
 
 module.exports = LogCollector
-const md5 = a => crypto.createHash('md5').update(a).digest('hex')
 // https://github.com/openzipkin/zipkin-js/blob/master/packages/zipkin/src/model.js
-function convertToZipkinSpan(span) {
+function convertToZipkinSpan (span) {
   const result = {}
-  result.traceId = md5(span.traceId)
+  result.traceId = span.traceId
   result.parentId = span.parentSpanId
   result.id = span.spanId
   result.name = span.name
@@ -45,13 +43,17 @@ function convertToZipkinSpan(span) {
   result.timestamp = span._startTime * 1000
   // it's microseconds
   result.duration = (span._finishTime - span._startTime) * 1000
-  result.tags = span.getTags()
+  const tags = span.getTags()
+  result.tags = Object.keys(tags).reduce((r, k) => {
+    r[k] = tags[k].toString()
+    return r
+  }, {})
 
   result.localEndpoint = {
     serviceName: span.getTag('appname'),
     ipv4: span.getTag('local.ipv4'),
     ipv6: span.getTag('local.ipv6'),
-    port: span.getTag('local.port'),
+    port: span.getTag('local.port')
   }
 
   let kind = span.getTag('span.kind')
@@ -64,7 +66,7 @@ function convertToZipkinSpan(span) {
       serviceName: span.getTag('peer.service'),
       ipv6: span.getTag('peer.ipv6'),
       ipv4: span.getTag('peer.ipv4'),
-      port: span.getTag('peer.port'),
+      port: span.getTag('peer.port')
     }
   }
 

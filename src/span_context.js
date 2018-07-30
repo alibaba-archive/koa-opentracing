@@ -2,8 +2,7 @@ const generateTraceId = require('./util/traceid').generate
 const generateSpanId = require('./util/spanid').generate
 
 class SpanContext {
-
-  constructor(parentSpanContext) {
+  constructor (parentSpanContext) {
     this._baggage = {}
 
     if (parentSpanContext instanceof SpanContext) {
@@ -20,22 +19,21 @@ class SpanContext {
     }
   }
 
-  setBaggage(key, value) {
+  setBaggage (key, value) {
     this._baggage[key] = value
   }
 
-  getBaggage(key) {
+  getBaggage (key) {
     return this._baggage[key]
   }
 
-  setBaggages(baggages) {
+  setBaggages (baggages) {
     Object.assign(this._baggage, baggages)
   }
 
-  getBaggages() {
+  getBaggages () {
     Object.assign({}, this._baggage)
   }
-
 }
 
 module.exports = SpanContext

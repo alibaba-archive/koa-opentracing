@@ -1,10 +1,9 @@
 class ConstSampler {
-
-  constructor(decision) {
+  constructor (decision) {
     this._decision = decision
   }
 
-  isSampled() {
+  isSampled () {
     return this._decision
   }
 }

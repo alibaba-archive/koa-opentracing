@@ -7,14 +7,14 @@ koaOpentracing(app, {
   logger: [
     {log: console.log}
   ],
-  httpCarrier: koaOpentracing.carrier.HTTPCarrier,
+  httpCarrier: null,
   carrier: {
     CustomHeaderCarrier: class CustomHeaderCarrier {
-      inject(spanContext) {
+      inject (spanContext) {
         return {'x-request-id': spanContext.traceId + spanContext.spanId}
       }
 
-      extract(header) {
+      extract (header) {
         const traceId = String(header['x-request-id']).substr(0, 32)
         const spanId = String(header['x-request-id']).substr(32)
         return {traceId, spanId}
@@ -27,7 +27,7 @@ app.use(async ctx => {
   const span = ctx.tracer.startSpan('t', {
     childOf: spanContext
   })
-  await new Promise(r => setTimeout(r, 1000))
+  await new Promise(resolve => setTimeout(resolve, 1000))
   span.finish()
 })
 app.listen('4010')
