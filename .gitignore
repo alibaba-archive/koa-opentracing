@@ -2,3 +2,4 @@ node_modules/
 test.js
 .nyc_output
 dist
+.yarn-error.log

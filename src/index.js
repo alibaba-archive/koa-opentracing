@@ -120,12 +120,12 @@ const middleware = (name, version) => {
 const v2 = (app, opt) => {
   koaOpentracing(app, opt, 'v2')
 }
-v2.middleware = (name, version) => middleware(name, version, 'v2')
+v2.middleware = name => middleware(name, 'v2')
 
 const v1 = (app, opt) => {
   koaOpentracing(app, opt, 'v1')
 }
-v1.middleware = (name, version) => middleware(name, version, 'v1')
+v1.middleware = name => middleware(name, 'v1')
 module.exports = v2
 module.exports.v2 = v2
 module.exports.v1 = v1

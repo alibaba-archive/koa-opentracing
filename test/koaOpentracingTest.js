@@ -229,4 +229,17 @@ describe('koaOpentracing', () => {
       expect(finishedSpan).to.be.undefined
     })
   })
+  describe('v1', () => {
+    const mockKoa = {
+      context: {},
+      use(fn) {
+        expect(fn.constructor.name).to.be.eqls('GeneratorFunction')
+      }
+    }
+    it('should return generator function', () => {
+      const v1 = koaOpentracing.v1
+      expect(() => v1(mockKoa, {appname: 'test'})).to.not.throw()
+      expect(v1.middleware('test').constructor.name).to.be.eqls('GeneratorFunction')
+    })
+  })
 })

@@ -1,6 +1,7 @@
 node_modules
 .nyc_output
 example
+test
 src
 !src/carrier/
 !src/sampler/
