@@ -42,6 +42,34 @@ describe('koaOpentracing', () => {
       expect(loggerTriggered).to.be.true
     })
   })
+  describe('mutli span', () => {
+    const app = new Koa()
+    const finishedSpan = []
+    before(done => {
+      koaOpentracing(app, {
+        appname: 'test',
+        httpCarrier: null,
+        logger: [{
+          log (span) {
+            finishedSpan.push(span)
+          }
+        }]
+      })
+      app.use(async ctx => {
+        const span0 = ctx.tracer.startSpan('t0')
+        const span2 = ctx.tracer.startSpan('t2')
+        const span1 = ctx.tracer.startSpan('t1')
+        span0.finish()
+        span2.finish()
+        span1.finish()
+      })
+      request(app.listen()).get('/').end(done)
+    })
+    it('should with same trace id', () => {
+      const traceId = finishedSpan.shift().context().traceId
+      expect(finishedSpan.every(span => span.context().traceId)).to.be.true
+    })
+  })
   describe('tracer.wrap', () => {
     const app = new Koa()
     let finishedSpan
