@@ -15,21 +15,14 @@ class Span extends opentracing.Span {
     this._startTime = spanOptions.startTime || Date.now()
     this._finishTime = null
     this._tags = spanOptions.tags || {}
-    this._references = spanOptions.references
+    this._references = spanOptions.references || []
     this._parentSpanContext = null
 
     // for test
     this.CONTEXT = spanOptions.context
 
-    if (!this.context()) {
-      if (this._references && this._references.length > 0) {
-        const parentSpanContext = this._references[0].referencedContext()
-        if (parentSpanContext instanceof Span) {
-          this._parentSpanContext = parentSpanContext.context()
-        } else {
-          this._parentSpanContext = parentSpanContext
-        }
-      }
+    if (!this.CONTEXT && this._references.length > 0) {
+      this._parentSpanContext = this._references[0].referencedContext()
     }
 
     this.CONTEXT = new SpanContext(this._parentSpanContext)

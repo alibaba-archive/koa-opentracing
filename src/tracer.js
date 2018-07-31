@@ -49,7 +49,11 @@ class Tracer extends opentracing.Tracer {
 
   _startSpan (name, spanOptions = {}) {
     assert(name, 'name is required when startSpan')
-
+    spanOptions.references = spanOptions.references || []
+    if (this.currentSpan) {
+      const reference = opentracing.childOf(this.currentSpan)
+      spanOptions.references.push(reference)
+    }
     const span = new Span(this, spanOptions)
     span.setOperationName(name)
     if (!this.traceId) this.traceId = span.traceId
