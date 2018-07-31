@@ -1,33 +1,45 @@
 {
   "name": "koa-opentracing",
-  "main": "src/index.js",
-  "version": "1.0.0",
-  "repository": "",
+  "main": "dist/index.js",
+  "version": "1.1.0",
+  "repository": "https://github.com/teambition/koa-opentracing.git",
   "author": "cnwangjie",
   "license": "MIT",
   "scripts": {
     "lint": "standard",
     "test": "mocha test --exit",
-    "coverage": "nyc -x src/logger --reporter=text yarn test"
+    "coverage": "nyc -x src/logger --reporter=text yarn test",
+    "build": "babel src -d dist",
+    "prepublish": "yarn build"
   },
   "dependencies": {
     "address": "^1.0.3",
-    "opentracing": "^0.14.3",
-    "zipkin": "^0.14.0",
-    "zipkin-transport-http": "^0.14.0"
+    "opentracing": "^0.14.3"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
     "istanbul": "^0.4.5",
     "koa": "^2.5.2",
+    "koa-router": "^7.4.0",
     "mocha": "^5.2.0",
     "nyc": "^12.0.2",
     "standard": "^11.0.1",
     "supertest": "^3.1.0"
   },
+  "peerDependencies": {
+    "zipkin": "^0.14.0",
+    "zipkin-transport-http": "^0.14.0"
+  },
   "standard": {
     "ignore": [
-      "test"
+      "test",
+      "dist"
     ]
+  },
+  "engines": {
+    "node": ">=6.1"
   }
 }

@@ -26,6 +26,12 @@ app.use(async ctx => {
 app.listen('4010')
 ```
 
+### Compatible with koa@1.*
+
+```js
+const koaOpentracing = require('koa-opentracing').v1
+```
+
 ### API
 
 ```ts
@@ -43,6 +49,16 @@ app.listen('4010')
  * @param {Sampler} [opt.sampler] an sampler instance
  */
 function koaOpentracing(app: Application, opt: Object) {}
+
+/**
+ * create an koa middleware and auto start a span
+ *
+ * * Compatible with koa@1.*
+ *
+ * @param {String} name span name
+ * @return {Function} middleware
+ */
+koaOpentracing.middleware(name: String): Function {}
 
 /**
  * all log method of loggers will be triggered after span finished
@@ -124,11 +140,17 @@ export declare class Tracer {
 
 ### Built in
 
-#### koaOpentracing.carrier.HTTPCarrier
+Need to import manually like following ways.
+
+```js
+const HTTPCarrier = require('koa-opentracing/src/carrier/httpCarrier')
+```
+
+#### src/carrier/httpCarrier
 
 Cross-process tracking via http header
 
-#### koaOpentracing.logger.ZipkinLogger
+#### src/logger/zipkinLogger
 
 Built-in logger for zipkin
 
@@ -142,7 +164,7 @@ class ZipkinLogger {
 }
 ```
 
-#### koaOpentracing.sampler.ConstSampler
+#### src/sampler/constSampler
 
 A simple constant sampler
 

@@ -1,5 +1,7 @@
 const Koa = require('koa')
 const koaOpentracing = require('../src')
+const HTTPCarrier = require('../src/carrier/httpCarrier')
+const ConstSampler = require('../src/sampler/constSampler')
 const { expect } = require('chai')
 const request = require('supertest')
 
@@ -147,7 +149,7 @@ describe('koaOpentracing', () => {
           }
         }],
         carrier: {
-          HTTP: new koaOpentracing.carrier.HTTPCarrier()
+          HTTP: new HTTPCarrier()
         }
       })
       app.use(async ctx => { })
@@ -163,7 +165,7 @@ describe('koaOpentracing', () => {
     before(done => {
       koaOpentracing(app, {
         appname: 'test',
-        httpCarrier: new koaOpentracing.carrier.HTTPCarrier(),
+        httpCarrier: new HTTPCarrier(),
         logger: [{
           log (span) {
             finishedSpan = span
@@ -218,7 +220,7 @@ describe('koaOpentracing', () => {
             finishedSpan = span
           }
         }],
-        sampler: new koaOpentracing.sampler.ConstSampler(false)
+        sampler: new ConstSampler(false)
       })
       app.use(async ctx => { })
       request(app.listen()).get('/').end(done)

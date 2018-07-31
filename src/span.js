@@ -70,7 +70,11 @@ class Span extends opentracing.Span {
   }
 
   _addTags (tags) {
-    Object.assign(this._tags, tags)
+    Object.entries(tags).map(([k, v]) => {
+      if (v != null) {
+        this._tags[k] = v
+      }
+    })
   }
 
   getTag (key) {
