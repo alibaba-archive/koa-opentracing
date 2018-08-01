@@ -91,7 +91,7 @@ interface Sampler {
 /**
  * Will be instantiated at the beginning of each request and assigned to ctx.tracer
  */
-export declare class Tracer {
+class Tracer {
     /**
      * Starts and returns a new Span representing a logical unit of work.
      *
@@ -140,7 +140,17 @@ export declare class Tracer {
      * @param {Boolean} [opt.logReturn] if true will trace the return
      * @return {Function} wrapped method
      */
-    wrap(fn: Function, opt: Object): Function,
+    wrap(fn: Function, opt: Object): Function;
+
+    /**
+     * Simplified form of inject. The spanContext is optional and if spanContext
+     * is undefined will use current span or create a new SpanContext.
+     *
+     * @param {String} format
+     * @param {SpanContext|Span} [spanContext]
+     * @return {Object} be injected object
+     */
+    expose(format: Span, spanContext?: SpanContext | Span): Object;
 }
 ```
 

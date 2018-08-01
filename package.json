@@ -1,7 +1,7 @@
 {
   "name": "koa-opentracing",
   "main": "dist/index.js",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "repository": "https://github.com/teambition/koa-opentracing.git",
   "author": "cnwangjie",
   "license": "MIT",

@@ -67,7 +67,7 @@ describe('koaOpentracing', () => {
     })
     it('should with same trace id', () => {
       const traceId = finishedSpan.shift().context().traceId
-      expect(finishedSpan.every(span => span.context().traceId)).to.be.true
+      expect(finishedSpan.every(span => span.context().traceId === traceId)).to.be.true
     })
   })
   describe('tracer.wrap', () => {
@@ -123,6 +123,102 @@ describe('koaOpentracing', () => {
     it('should log error correctly', () => {
       expect(finishedSpan).to.not.be.undefined
       expect(finishedSpan.getTag('error')).to.be.true
+    })
+  })
+  describe('tracer.expose', () => {
+    const app = new Koa()
+    let injectSpanContext
+    let injectedObject
+    before(done => {
+      koaOpentracing(app, {
+        appname: 'test',
+        httpCarrier: null,
+        carrier: {
+          'test': {
+            inject(spanContext) {
+              injectSpanContext = spanContext
+              return {
+                traceId: spanContext.traceId,
+                spanId: spanContext.spanId
+              }
+            },
+            extract() {
+
+            }
+          }
+        }
+      })
+      app.use(async ctx => {
+        injectedObject = ctx.tracer.expose('test')
+      })
+      request(app.listen()).get('/').end(done)
+    })
+    it('should expose correctly if no spanContext', () => {
+      expect(injectSpanContext).to.not.be.undefined
+      expect(injectSpanContext.traceId).to.not.be.undefined
+      expect(injectedObject).to.not.be.undefined
+      expect(injectedObject.traceId).to.eql(injectSpanContext.traceId)
+      expect(injectedObject.spanId).to.eql(injectSpanContext.spanId)
+    })
+  })
+  describe('tracer.expose', () => {
+    const app = new Koa()
+    let injectSpanContext
+    let expectedSpan
+    before(done => {
+      koaOpentracing(app, {
+        appname: 'test',
+        httpCarrier: null,
+        carrier: {
+          'test': {
+            inject(spanContext) {
+              injectSpanContext = spanContext
+            },
+            extract() {
+
+            }
+          }
+        }
+      })
+      app.use(async ctx => {
+        expectedSpan = ctx.tracer.startSpan('t')
+        expectedSpan.finish()
+        ctx.tracer.expose('test')
+      })
+      request(app.listen()).get('/').end(done)
+    })
+    it('should expose current span if no spanContext and current span exists', () => {
+      expect(injectSpanContext).to.eql(expectedSpan.context())
+    })
+  })
+  describe('tracer.expose', () => {
+    const app = new Koa()
+    let injectSpanContext
+    let expectedSpan
+    before(done => {
+      koaOpentracing(app, {
+        appname: 'test',
+        httpCarrier: null,
+        carrier: {
+          'test': {
+            inject(spanContext) {
+              injectSpanContext = spanContext
+            },
+            extract() {
+
+            }
+          }
+        }
+      })
+      app.use(async ctx => {
+        expectedSpan = ctx.tracer.startSpan('t')
+        expectedSpan.finish()
+        ctx.tracer.expose('test', expectedSpan.context())
+      })
+      request(app.listen()).get('/').end(done)
+    })
+    it('should expose correct spanContext if gived', () => {
+      expect(injectSpanContext).to.eql(expectedSpan.context())
     })
   })
   describe('koaOpentracing.middleware', () => {

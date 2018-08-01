@@ -23,6 +23,22 @@ class Tracer extends opentracing.Tracer {
   }
 
   /**
+   * Simplified form of inject. The spanContext is optional and if spanContext
+   * is undefined will use current span or create a new SpanContext.
+   *
+   * @param {String} format
+   * @param {SpanContext|Span} [spanContext]
+   * @return {Object} be injected object
+   */
+  expose (format, spanContext) {
+    spanContext = spanContext != null ? spanContext
+      : this.currentSpan ? this.currentSpan.context() : new SpanContext()
+    const carrier = {}
+    this.inject(spanContext, format, carrier)
+    return carrier
+  }
+
+  /**
    *
    * @param {Async function} fn
    * @param {Object} [opt]
