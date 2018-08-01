@@ -178,9 +178,9 @@ Built-in logger for zipkin
 ```ts
 class ZipkinLogger {
   constructor(opt: {
-    version: 'v1' | 'v2',
+    version?: 'v1' | 'v2' = 'v1'
     endpoint: string
-    interval: number
+    interval: number = 1000
   })
 }
 ```

@@ -14,15 +14,12 @@ const map = {
 }
 
 class LogCollector {
-  constructor (config) {
-    const zipkinConfig = config
-
-    let options = map[zipkinConfig.version]
-    assert(options, `${zipkinConfig.version} is not supported, should be v1 or v2`)
-    options = Object.assign({}, options)
-    options.endpoint = zipkinConfig.endpoint + options.endpoint
-    options.httpInterval = zipkinConfig.interval
-
+  constructor (opt) {
+    const version = opt.version || 'v2'
+    assert(version in map, 'version should be either v1 or v2')
+    const options = Object.assign({}, map[version])
+    options.endpoint = opt.endpoint + options.endpoint
+    options.httpInterval = opt.interval || 1000
     this.logger = new HttpLogger(options)
   }
 
