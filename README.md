@@ -1,6 +1,12 @@
 koa-opentracing
 ======
 
+[![Build Status](https://travis-ci.org/teambition/koa-opentracing.svg?branch=master)](https://travis-ci.org/teambition/koa-opentracing)
+[![Coverage Status](https://coveralls.io/repos/github/teambition/koa-opentracing/badge.svg?branch=master)](https://coveralls.io/github/teambition/koa-opentracing?branch=master)
+![](https://img.shields.io/npm/v/koa-opentracing.svg)
+![](https://img.shields.io/node/v/koa-opentracing.svg)
+![](https://img.shields.io/npm/l/koa-opentracing.svg)
+
 A koa opentracing plugin and fully compatible with opentracing.
 
 ### Usage
