@@ -122,7 +122,28 @@ describe('koaOpentracing', () => {
     })
     it('should log error correctly', () => {
       expect(finishedSpan).to.not.be.undefined
-      expect(finishedSpan.getTags().error).to.be.true
+      expect(finishedSpan.getTag('error')).to.be.true
+    })
+  })
+  describe('koaOpentracing.middleware', () => {
+    const app = new Koa()
+    let finishedSpan
+    before(done => {
+      koaOpentracing(app, {
+        appname: 'test',
+        httpCarrier: null,
+        logger: [{
+          log (span) {
+            finishedSpan = span
+          }
+        }]
+      })
+      app.use(koaOpentracing.middleware('test'))
+      app.use(async ctx => { })
+      request(app.listen()).get('/').end(done)
+    })
+    it('should start span correctly', () => {
+      expect(finishedSpan).to.not.be.undefined
     })
   })
   describe('when opt.httpCarrier = null', () => {

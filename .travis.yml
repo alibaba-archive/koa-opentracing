@@ -1,0 +1,16 @@
+sudo: required
+language: node_js
+node_js:
+  - node
+  - lts/boron
+  - lts/carbon
+
+cache:
+  yarn: true
+
+script:
+  - yarn lint
+  - yarn test
+
+after_success:
+  - yarn coverage

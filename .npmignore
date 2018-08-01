@@ -6,3 +6,5 @@ src
 !src/carrier/
 !src/sampler/
 !src/logger/
+coverage
+yarn-error.log

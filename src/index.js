@@ -2,6 +2,7 @@ const assert = require('assert')
 const Tracer = require('./tracer')
 const {NoopTracer} = require('./noop')
 const { getCarrier, setCarrier } = require('./carriers')
+require('babel-polyfill')
 
 /**
  *

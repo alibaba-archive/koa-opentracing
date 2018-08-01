@@ -7,13 +7,14 @@
   "license": "MIT",
   "scripts": {
     "lint": "standard",
-    "test": "mocha test --exit",
-    "coverage": "nyc -x src/logger --reporter=text yarn test",
+    "test": "nyc --reporter=text mocha test --require babel-core/register --exit",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "babel src -d dist",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "address": "^1.0.3",
+    "babel-polyfill": "^6.26.0",
     "opentracing": "^0.14.3"
   },
   "devDependencies": {
@@ -21,6 +22,7 @@
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
+    "coveralls": "^3.0.2",
     "istanbul": "^0.4.5",
     "koa": "^2.5.2",
     "koa-router": "^7.4.0",
@@ -41,5 +43,13 @@
   },
   "engines": {
     "node": ">=6.1"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "src/logger"
+    ]
   }
 }
