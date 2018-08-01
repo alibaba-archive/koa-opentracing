@@ -23,6 +23,13 @@ class Tracer extends opentracing.Tracer {
   }
 
   /**
+   * @return {Boolean} whether this tracer is sampled
+   */
+  isSampled () {
+    return true
+  }
+
+  /**
    * Simplified form of inject. The spanContext is optional and if spanContext
    * is undefined will use current span or create a new SpanContext.
    *

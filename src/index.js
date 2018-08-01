@@ -43,8 +43,9 @@ const koaOpentracing = (app, opt, version) => {
 
 const createTracer = (opt, version) => {
   const _createTracer = (ctx, opt) => {
+    if (ctx.tracer) return
     if (opt.sampler && !opt.sampler.isSampled(ctx)) ctx.tracer = new NoopTracer()
-    ctx.tracer = ctx.tracer || new Tracer(opt)
+    else ctx.tracer = new Tracer(opt)
   }
   if (version === 'v1') {
     return function * createTracer (next) {
@@ -64,6 +65,9 @@ const traceHttp = (opt, httpCarrier, version) => {
     const span = ctx.tracer.startSpan('http', {
       childOf: spanContext
     })
+    if (ctx.tracer.isSampled() && (!spanContext || spanContext.getBaggage('X-B3-Sampled') == null)) {
+      span.context().setBaggage('X-B3-Sampled', 1)
+    }
     span.setTag('span.kind', 'server')
     return span
   }

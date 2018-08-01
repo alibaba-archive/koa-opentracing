@@ -151,6 +151,11 @@ class Tracer {
      * @return {Object} be injected object
      */
     expose(format: Span, spanContext?: SpanContext | Span): Object;
+
+    /**
+     * @return {Boolean} whether this tracer is sampled
+     */
+    isSampled(): Boolean;
 }
 ```
 

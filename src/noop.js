@@ -8,6 +8,10 @@ class NoopSpan extends Span {
 }
 
 class NoopTracer extends Tracer {
+  isSampled () {
+    return false
+  }
+
   _startSpan () {
     return new NoopSpan(this)
   }

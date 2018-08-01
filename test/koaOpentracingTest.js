@@ -1,5 +1,7 @@
 const Koa = require('koa')
 const koaOpentracing = require('../src')
+const noop = require('../src/noop')
+const Tracer = require('../src/tracer')
 const HTTPCarrier = require('../src/carrier/httpCarrier')
 const ConstSampler = require('../src/sampler/constSampler')
 const { expect } = require('chai')
@@ -221,6 +223,12 @@ describe('koaOpentracing', () => {
       expect(injectSpanContext).to.eql(expectedSpan.context())
     })
   })
+  describe('tracer.isSampled', () => {
+    it('should return true if is sampled', () => {
+      expect(new Tracer().isSampled()).to.be.true
+      expect(new noop.NoopTracer().isSampled()).to.be.false
+    })
+  })
   describe('koaOpentracing.middleware', () => {
     const app = new Koa()
     let finishedSpan
@@ -322,6 +330,25 @@ describe('koaOpentracing', () => {
     })
     it('should start span to trace whole http request', () => {
       expect(finishedSpan).to.not.be.undefined
+    })
+  })
+  describe('transfer X-B3-Sampled to downupstream', () => {
+    const app = new Koa()
+    let finishedSpan
+    before(done => {
+      koaOpentracing(app, {
+        appname: 'test',
+        logger: [{
+          log (span) {
+            finishedSpan = span
+          }
+        }]
+      })
+      app.use(async ctx => { })
+      request(app.listen()).get('/').end(done)
+    })
+    it('should set X-B3-Sampled when it is sampled and without upstream baggage', () => {
+      expect(finishedSpan.context().getBaggage('X-B3-Sampled')).to.eql(1)
     })
   })
   describe('carrier', () => {
