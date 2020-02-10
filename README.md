@@ -12,6 +12,7 @@ A koa opentracing plugin and fully compatible with opentracing.
 ### Usage
 
 ```js
+require('@babel/polyfill') // if necessary
 const Koa = require('koa')
 const app = new Koa()
 
